@@ -4,10 +4,9 @@ import Problem from "../models/Problem.js";
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect("mongodb://127.0.0.1:27017/CodeQuest")
+  .then(() => console.log('MongoDB connected successfully!'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const problems = [
   {
