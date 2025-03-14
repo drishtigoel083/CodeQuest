@@ -1,7 +1,6 @@
 import express from "express";
 import Problem from "../models/Problem.js";
-import axios from "axios";
-import dotenv from "dotenv";
+import { checkUser } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -37,5 +36,9 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.get(":id/verify",checkUser,async(req,res)=>{
+  //logic fro verification of code and sending appropriate response message
+})
 
 export default router;
