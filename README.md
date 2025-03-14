@@ -28,6 +28,8 @@ A full-stack web application that replicates the core functionality of LeetCode,
 - VS Code for development
 
 ## Directory Structure
+
+```
 Leetcode-Clone/
 │── Backend/
 │   ├── models/
@@ -47,4 +49,7 @@ Leetcode-Clone/
 │   │   ├── HomePage.jsx
 │   │   ├── ProblemPage.jsx
 │   │   ├── ProblemsPage.jsx
+
+```
+```
 
