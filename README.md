@@ -1,2 +1,0 @@
-# CodeQuest
-A Leetcode Clone
