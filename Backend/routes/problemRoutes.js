@@ -32,7 +32,7 @@ function convertToJson(code, lang, input) {
   
   const jsonData = {
     "clientId": process.env.CLIENT_ID,
-    "clientSecret": CLIENT_SECRET,
+    "clientSecret": process.env.CLIENT_SECRET,
     "script": code,           
     "stdin": input || "",              
     "language": lang,                  
