@@ -10,10 +10,10 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "hhttps://codequest-frontend-0kz2.onrender.com", 
+  origin: "https://codequest-frontend-0kz2.onrender.com", 
   credentials: true, 
   methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization",
+  allowedHeaders: ["Content-Type,Authorization"],
 }));
 
 app.use(cookieParser());
