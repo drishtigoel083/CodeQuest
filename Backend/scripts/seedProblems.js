@@ -4,7 +4,7 @@ import Problem from "../models/Problem.js";
 
 dotenv.config();
 
-const mongoURL = process.env.MONGO_URL;
+const mongoURL = process.env.MONGO_URI;
 mongoose.connect(mongoURL)
   .then(() => console.log('MongoDB connected successfully!'))
   .catch(err => console.error('MongoDB connection error:', err));
