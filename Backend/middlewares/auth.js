@@ -8,7 +8,7 @@ export const checkUser = async (req, res, next) => {
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  jwt.verify(token, "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp", async (err, decodedToken) => {
+  jwt.verify(token, process.env.TOKEN, async (err, decodedToken) => {
     if (err) {
       return res.status(401).json({ message: "Invalid or Expired Token" });
     }

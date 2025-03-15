@@ -25,8 +25,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
 
 // Connect to MongoDB
-// const mongoURL = process.env.MONGO_URL;
-mongoose.connect("mongodb://127.0.0.1:27017/CodeQuest")
+const mongoURL = process.env.MONGO_URL;
+mongoose.connect(mongoURL)
   .then(() => console.log('MongoDB connected successfully!'))
   .catch(err => console.error('MongoDB connection error:', err));
 
