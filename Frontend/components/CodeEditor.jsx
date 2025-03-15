@@ -1,7 +1,7 @@
 import React from "react";
 import Editor from "@monaco-editor/react";
 
-const CodeEditor = ({ language, setLanguage, code, setCode, handleRun, handleSubmit, output, loading }) => {
+const CodeEditor = ({ language, setLanguage, code, setCode, handleSubmit, output, loading }) => {
   return (
     <div className="w-1/2 p-4 bg-gray-950 text-white flex flex-col">
       {/* Language Selection */}
@@ -28,15 +28,8 @@ const CodeEditor = ({ language, setLanguage, code, setCode, handleRun, handleSub
         onChange={(value) => setCode(value)}
       />
 
-      {/* Run & Submit Buttons */}
+      {/* Submit Button */}
       <div className="flex space-x-4 mt-4">
-        <button
-          onClick={handleRun}
-          disabled={loading}
-          className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Run
-        </button>
         <button
           onClick={handleSubmit}
           disabled={loading}
