@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: "1h" });
   res.cookie("jwt", token, {
     httpOnly: true,
-    sameSite: "Strict", 
+    sameSite: "none", 
     maxAge: 3600000, 
   });
 
