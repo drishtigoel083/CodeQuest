@@ -14,7 +14,7 @@ const RegisterPage = () => {
     setError("");
 
     try {
-      const response = await axios.post("https://codequest-backend-hvzr.onrender.com/api/auth/register", {
+      const response = await axios.post("http://localhost:5000/api/auth/register", {
         username,
         email,
         password,

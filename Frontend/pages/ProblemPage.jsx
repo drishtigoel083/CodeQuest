@@ -13,7 +13,7 @@ function ProblemPage() {
 
   useEffect(() => {
     axios
-      .get(`https://codequest-backend-hvzr.onrender.com/api/problems/${id}`)
+      .get(`http://localhost:5000/api/problems/${id}`)
       .then((res) => setProblem(res.data))
       .catch((err) => console.error("Error fetching problem", err));
   }, [id]);
@@ -22,7 +22,7 @@ function ProblemPage() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `https://codequest-backend-hvzr.onrender.com/api/problems/${id}/verify`,
+        `http://localhost:5000/api/problems/${id}/verify`,
         {
           code:code,
           language:language

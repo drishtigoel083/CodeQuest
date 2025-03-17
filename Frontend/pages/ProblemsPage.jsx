@@ -12,7 +12,7 @@ function ProblemsPage() {
 
   useEffect(() => {
     axios
-      .get(`https://codequest-backend-hvzr.onrender.com/api/problems?page=${page}`)
+      .get(`http://localhost:5000/api/problems?page=${page}`)
       .then((res) => {
         setProblems(res.data.problems);
         setTotalPages(res.data.totalPages);
@@ -22,7 +22,7 @@ function ProblemsPage() {
 
   useEffect(() => {
     axios
-      .get("https://codequest-backend-hvzr.onrender.com/api/auth/profile", { withCredentials: true })
+      .get("http://localhost:5000/api/auth/profile", { withCredentials: true })
       .then((res) => setUsername(res.data.username))
       .catch((err) => console.error("Error fetching username", err));
   }, []);
