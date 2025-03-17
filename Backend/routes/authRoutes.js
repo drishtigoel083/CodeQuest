@@ -39,8 +39,7 @@ router.post("/login", async (req, res) => {
     maxAge: 3600000, 
   });
 
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+
   return res.json({ message: "Login successful", user: { id: user._id, username: user.username } });
 });
 
