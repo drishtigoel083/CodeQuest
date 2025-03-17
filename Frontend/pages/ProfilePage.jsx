@@ -11,7 +11,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/profile", {
+        const response = await axios.get("https://codequest-server-3fyv.onrender.com/api/auth/profile", {
           withCredentials: true,
         });
         setUser(response.data);
@@ -27,7 +27,7 @@ const ProfilePage = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
+      await axios.post("https://codequest-server-3fyv.onrender.com/api/auth/logout", {}, { withCredentials: true });
     } catch (err) {
       console.error("Logout failed:", err);
     }
