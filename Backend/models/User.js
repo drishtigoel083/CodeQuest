@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
   ],
   profilePic : {
     type:String,
-    default : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ffreesvg.org%2Fusers-profile-icon&psig=AOvVaw1-FlfF7DAoL-UVV2ATC5IH&ust=1742568231199000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCLDO_-TymIwDFQAAAAAdAAAAABAE",
+    default : "https://freesvg.org/img/abstract-user-flat-4.png",
   }
 });
 
