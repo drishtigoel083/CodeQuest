@@ -72,17 +72,25 @@ router.post("/:id/verify",checkUser, async (req, res) => {
   let { code, language } = req.body;
 const problem = await Problem.findById(req.params.id);
 let allOutputsMatch = true;  
-
+let res=[];
 for (let i = 0; i < problem.testCases.length; i++) {
   const testCase = problem.testCases[i];
   const input = testCase.input;
   const expectedOutput = testCase.output;
+  
 
   try {
     
     const response = await axios.post('https://api.jdoodle.com/v1/execute', 
       convertToJson(code, getJDoodleLanguages(language), input));
 
+    const op = response.data;
+    res.push({
+      output:op.output,
+      runtime : op.cpuTime,
+      memory : op.memory
+
+    });
     
     const output = response.data.output.trim().replace(/\s+/g, '');  
     const cleanExpectedOutput = expectedOutput.trim().replace(/\s+/g, '');  
@@ -104,10 +112,10 @@ if (allOutputsMatch) {
     user.solvedQues.push(req.params.id);
     await user.save();
   }
-  res.json({message:"Correct Submission"});
+  res.json({message:"Correct Submission",result : res});
 }
 else{
-  res.json({message:"incorrect Submission"});
+  res.json({message:"incorrect Submission",result : res});
 }
 
 });
