@@ -72,7 +72,7 @@ router.post("/:id/verify",checkUser, async (req, res) => {
   let { code, language } = req.body;
 const problem = await Problem.findById(req.params.id);
 let allOutputsMatch = true;  
-let res=[];
+let resultOfCompilation=[];
 for (let i = 0; i < problem.testCases.length; i++) {
   const testCase = problem.testCases[i];
   const input = testCase.input;
@@ -85,7 +85,7 @@ for (let i = 0; i < problem.testCases.length; i++) {
       convertToJson(code, getJDoodleLanguages(language), input));
 
     const op = response.data;
-    res.push({
+    resultOfCompilation.push({
       output:op.output,
       runtime : op.cpuTime,
       memory : op.memory
@@ -112,10 +112,10 @@ if (allOutputsMatch) {
     user.solvedQues.push(req.params.id);
     await user.save();
   }
-  res.json({message:"Correct Submission",result : res});
+  res.json({message:"Correct Submission",result : resultOfCompilation});
 }
 else{
-  res.json({message:"incorrect Submission",result : res});
+  res.json({message:"incorrect Submission",result : resultOfCompilation});
 }
 
 });
