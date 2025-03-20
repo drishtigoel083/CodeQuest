@@ -53,6 +53,23 @@ router.get("/profile", checkUser, async (req, res) => {
 });
 
 export default router;
+//profile pic
+router.post("/updateProfilePic", checkUser, async (req, res) => {
+  const { profilePic } = req.body; 
+  const user = req.user;
+
+  if (!profilePic) {
+    return res.status(400).json({ message: "Profile picture URL is required" });
+  }
+
+  try {
+    user.profilePic = profilePic;
+    await user.save();
+    res.status(200).json({ message: "Profile picture updated", profilePic });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating profile picture" });
+  }
+});
 
 
 //logout
