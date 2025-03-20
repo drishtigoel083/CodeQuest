@@ -5,9 +5,11 @@ import { FaUserCircle } from "react-icons/fa";
 
 function ProblemsPage() {
   const [problems, setProblems] = useState([]);
+  const [filteredProblems, setFilteredProblems] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [username, setUsername] = useState("user");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +17,7 @@ function ProblemsPage() {
       .get(`https://codequest-server-3fyv.onrender.com/api/problems?page=${page}`)
       .then((res) => {
         setProblems(res.data.problems);
+        setFilteredProblems(res.data.problems);
         setTotalPages(res.data.totalPages);
       })
       .catch((err) => console.error("Error fetching problems", err));
@@ -26,6 +29,13 @@ function ProblemsPage() {
       .then((res) => setUsername(res.data.username))
       .catch((err) => console.error("Error fetching username", err));
   }, []);
+
+  useEffect(() => {
+    const filtered = problems.filter(problem => 
+      problem.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredProblems(filtered);
+  }, [searchQuery, problems]);
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty.toLowerCase()) {
@@ -44,13 +54,24 @@ function ProblemsPage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center">
       {/* Navbar */}
       <div className="w-full flex justify-end p-4 bg-gray-800 fixed top-0 left-0 right-0">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/profile")}>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/profile")}> 
           <FaUserCircle className="text-2xl" />
           <span className="text-lg">{username}</span>
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold mt-16 mb-6">Problem List</h1>
+      {/* Search Bar */}
+      <div className="w-3/4 mt-20 mb-4 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search problems..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="p-3 w-3/4 rounded-full bg-gray-700 text-white focus:outline-none text-left px-4 shadow-md"
+        />
+      </div>
+
+      <h1 className="text-3xl font-bold mb-6">Problem List</h1>
 
       <div className="w-3/4 overflow-auto">
         <table className="w-full border border-gray-700">
@@ -62,7 +83,7 @@ function ProblemsPage() {
             </tr>
           </thead>
           <tbody>
-            {problems.map((problem) => (
+            {filteredProblems.map((problem) => (
               <tr key={problem._id} className="hover:bg-gray-900 transition">
                 <td className="p-3 border-b border-gray-700">
                   <Link to={`/problems/${problem._id}`} className="text-blue-400 hover:underline">
