@@ -99,6 +99,11 @@ for (let i = 0; i < problem.testCases.length; i++) {
 }
 
 if (allOutputsMatch) {
+  let user = req.user;
+  if (!user.solvedQues.includes(req.params.id)) {
+    user.solvedQues.push(req.params.id);
+    await user.save();
+  }
   res.json({message:"Correct Submission"});
 }
 else{
