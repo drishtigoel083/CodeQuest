@@ -10,6 +10,8 @@ function ProblemPage() {
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState(null);
 
   useEffect(() => {
     axios
@@ -23,17 +25,12 @@ function ProblemPage() {
     try {
       const res = await axios.post(
         `https://codequest-server-3fyv.onrender.com/api/problems/${id}/verify`,
-        {
-          code:code,
-          language:language
-        },
-        {
-          withCredentials: true
-        }
+        { code, language },
+        { withCredentials: true }
       );
-      
-      
-      setOutput(res.data.message);
+
+      setSubmissionResult(res.data);
+      setShowModal(true); // Show modal on submission
     } catch (error) {
       setOutput("Submission failed");
     }
@@ -43,7 +40,7 @@ function ProblemPage() {
   if (!problem) return <p>Loading...</p>;
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen relative">
       {/* Problem Description */}
       <div className="w-1/2 p-6 overflow-auto border-r border-gray-600 bg-white text-black">
         <h1 className="text-2xl font-bold text-black">{problem.title}</h1>
@@ -72,17 +69,6 @@ function ProblemPage() {
             </pre>
           </div>
         )}
-
-        {/* Sample Image (Optional) */}
-        {problem.image && (
-          <div className="mt-4 flex justify-center">
-            <img
-              src={problem.image}
-              alt="Sample"
-              className="w-full max-w-md rounded-lg border border-gray-700"
-            />
-          </div>
-        )}
       </div>
 
       {/* Code Editor */}
@@ -95,6 +81,49 @@ function ProblemPage() {
         output={output}
         loading={loading}
       />
+
+      {/* Submission Result Modal */}
+      {showModal && submissionResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            {/* Status (Correct or Incorrect) */}
+            <div className="flex justify-center items-center mb-4">
+              {submissionResult.message === "Correct Submission" ? (
+                <span className="text-green-600 text-5xl">✅</span>
+              ) : (
+                <span className="text-red-600 text-5xl">❌</span>
+              )}
+            </div>
+            <h2 className="text-xl font-bold text-center">
+              {submissionResult.message}
+            </h2>
+
+            {/* Test Case Results */}
+            <div className="mt-4 max-h-96 overflow-auto">
+              {submissionResult.result.map((test, index) => (
+                <div key={index} className="border p-3 rounded-md my-2">
+                  <p><strong>Test Case {index + 1}</strong></p>
+                  <p><strong>Input:</strong> {problem.testCases[index].input}</p>
+                  <p><strong>Expected Output:</strong> {problem.testCases[index].output}</p>
+                  <p><strong>Your Output:</strong> {test.output}</p>
+                  <p><strong>Runtime:</strong> {test.runtime} sec</p>
+                  <p><strong>Memory:</strong> {test.memory} KB</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Close Button */}
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
