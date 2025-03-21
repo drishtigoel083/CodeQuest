@@ -34,18 +34,18 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: "1h" });
   res.cookie("jwt", token, {
     httpOnly: true,
-    sameSite: "Strict", 
+    secure: true,
+    sameSite: "none", 
     maxAge: 3600000, 
   });
 
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+
   return res.json({ message: "Login successful", user: { id: user._id, username: user.username } });
 });
 
 // Profile Route
 router.get("/profile", checkUser, async (req, res) => {
-  const user = req.user;
+  const user = await req.user.populate("solvedQues", "difficulty");
   if (!user) {
     return res.status(404).json({ message: "Profile not found" });
   }
@@ -53,6 +53,23 @@ router.get("/profile", checkUser, async (req, res) => {
 });
 
 export default router;
+//profile pic
+router.post("/updateProfilePic", checkUser, async (req, res) => {
+  const { profilePic } = req.body; 
+  const user = req.user;
+
+  if (!profilePic) {
+    return res.status(400).json({ message: "Profile picture URL is required" });
+  }
+
+  try {
+    user.profilePic = profilePic;
+    await user.save();
+    res.status(200).json({ message: "Profile picture updated", profilePic });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating profile picture" });
+  }
+});
 
 
 //logout
