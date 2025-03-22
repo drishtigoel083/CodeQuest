@@ -20,7 +20,7 @@ A full-stack web application that replicates the core functionality of LeetCode,
 ### Backend:
 - Node.js
 - Express.js
-- MongoDB (or PostgreSQL)
+- MongoDB (for database)
 - JWT for authentication
 
 ### Other Tools:
