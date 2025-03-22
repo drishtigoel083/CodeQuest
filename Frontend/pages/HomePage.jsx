@@ -16,7 +16,7 @@ const HomePage = () => {
 
         <div className="md:w-1/2 text-center md:text-left p-6">
           <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-            Welcome to <span className="text-blue-600">CodeQuest</span>
+            Welcome to <span className="text-emerald-500">CodeQuest</span>
           </h1>
 
           <p className="text-gray-700 text-lg mb-6 leading-relaxed">
