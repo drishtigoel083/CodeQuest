@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import dotenv from "dotenv"
+
+dotenv.config()
 
 export const checkUser = async (req, res, next) => {
   const token = req.cookies.jwt;
@@ -8,7 +11,7 @@ export const checkUser = async (req, res, next) => {
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  jwt.verify(token, process.env.TOKEN, async (err, decodedToken) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decodedToken) => {
     if (err) {
       return res.status(401).json({ message: "Invalid or Expired Token" });
     }

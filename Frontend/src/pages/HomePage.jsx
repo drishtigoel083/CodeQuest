@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import { Link } from "react-router-dom";
-import editorImage from "../src/assets/Frontimage.png.png";
+import editorImage from "../assets/Frontimage.png.png";
 
 const HomePage = () => {
   return (

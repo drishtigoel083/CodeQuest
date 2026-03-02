@@ -1,8 +1,11 @@
 import express from "express";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv"
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { checkUser } from "../middlewares/auth.js";
+
+dotenv.config()
 
 const router = express.Router();
 
@@ -31,7 +34,7 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ message: "Invalid credentials" });
   }
 
-  const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: "1h" });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: true,
