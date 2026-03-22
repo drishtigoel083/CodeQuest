@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 import CodeEditor from "../components/CodeEditor";
 
 function ProblemPage() {
@@ -13,12 +13,24 @@ function ProblemPage() {
   const [showModal, setShowModal] = useState(false);
   const [submissionResult, setSubmissionResult] = useState(null);
 
+  // useEffect(() => {
+  //   axios
+  //     .get(`https://codequest-server-3fyv.onrender.com/api/problems/${id}`)
+  //     .then((res) => setProblem(res.data))
+  //     .catch((err) => console.error("Error fetching problem", err));
+  // }, [id]);
+
   useEffect(() => {
-    axios
-      .get(`https://codequest-server-3fyv.onrender.com/api/problems/${id}`)
-      .then((res) => setProblem(res.data))
-      .catch((err) => console.error("Error fetching problem", err));
-  }, [id]);
+    const prob = async() => {
+       try {
+        const res = await api.get(`/api/problems/${id}`)
+        setProblem(res.data)   
+       } catch (error) {
+        console.error("Error Fetching problem", err)
+       }
+    }
+    prob()
+  }, [id])
 
   const handleSubmit = async () => {
     setLoading(true);

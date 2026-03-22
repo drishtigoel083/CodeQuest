@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 
 function ProblemsPage() {
   const [problems, setProblems] = useState([]);
@@ -13,29 +13,52 @@ function ProblemsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  //Fetching All problems
+
   useEffect(() => {
-    axios
-      .get(`https://codequest-server-3fyv.onrender.com/api/problems?page=${page}`)
-      .then((res) => {
+    const fetchProblems = async() => {
+      try {
+        const res = await api.get(`/api/problems?page=${page}`)
         setProblems(res.data.problems);
         setFilteredProblems(res.data.problems);
         setTotalPages(res.data.totalPages);
-      })
-      .catch((err) => console.error("Error fetching problems", err));
-  }, [page]);
+        
+      } catch (err) {
+        console.error("Error fetching problems",err)       
+      }
 
+    };
+    fetchProblems()
+  },[page])
+
+  // useEffect(() => {
+  //   axios
+  //     .get("https://codequest-server-3fyv.onrender.com/api/auth/profile", {
+  //       withCredentials: true,
+  //     })
+  //     .then((res) => {
+  //       setUsername(res.data.username);
+  //       setProfilePic(res.data.profilePic);
+  //       setSolvedQues(res.data.solvedQues.map((q) => q._id));
+  //     })
+  //     .catch((err) => console.error("Error fetching user data", err));
+  // }, []);
+
+  //userData show
   useEffect(() => {
-    axios
-      .get("https://codequest-server-3fyv.onrender.com/api/auth/profile", {
-        withCredentials: true,
-      })
-      .then((res) => {
+    const authProf = async() => {
+      try {
+        const res = await api.get("/api/auth/profile")
         setUsername(res.data.username);
         setProfilePic(res.data.profilePic);
         setSolvedQues(res.data.solvedQues.map((q) => q._id));
-      })
-      .catch((err) => console.error("Error fetching user data", err));
-  }, []);
+        
+      } catch (err) {
+        console.error("Error fetching user data", err)       
+      }
+    }
+    authProf()
+  },[]);
 
   useEffect(() => {
     const filtered = problems.filter((problem) =>
