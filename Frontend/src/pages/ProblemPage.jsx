@@ -5,47 +5,52 @@ import CodeEditor from "../components/CodeEditor";
 
 function ProblemPage() {
   const { id } = useParams();
+
   const [problem, setProblem] = useState(null);
+  const [testcases, setTestcases] = useState([]);
+
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [submissionResult, setSubmissionResult] = useState(null);
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`https://codequest-server-3fyv.onrender.com/api/problems/${id}`)
-  //     .then((res) => setProblem(res.data))
-  //     .catch((err) => console.error("Error fetching problem", err));
-  // }, [id]);
-
+  // ✅ Fetch problem + testcases
   useEffect(() => {
-    const prob = async() => {
-       try {
-        const res = await api.get(`/api/problems/${id}`)
-        setProblem(res.data)   
-       } catch (error) {
-        console.error("Error Fetching problem", err)
-       }
-    }
-    prob()
-  }, [id])
+    const fetchProblem = async () => {
+      try {
+        const res = await api.get(`api/problems/${id}`);
 
+        setProblem(res.data.problem);
+        setTestcases(res.data.testcases);
+
+      } catch (error) {
+        console.error("Error Fetching problem", error);
+      }
+    };
+
+    fetchProblem();
+  }, [id]);
+
+  // ✅ Submit Code
   const handleSubmit = async () => {
     setLoading(true);
+
     try {
-      const res = await axios.post(
-        `https://codequest-server-3fyv.onrender.com/api/problems/${id}/verify`,
-        { code, language },
-        { withCredentials: true }
+      const res = await api.post(
+        `/submissions/submit`, // future-proof endpoint
+        { code, language, problemId: id }
       );
 
       setSubmissionResult(res.data);
-      setShowModal(true); // Show modal on submission
+      setShowModal(true);
+
     } catch (error) {
       setOutput("Submission failed");
     }
+
     setLoading(false);
   };
 
@@ -53,37 +58,40 @@ function ProblemPage() {
 
   return (
     <div className="flex h-screen relative">
-      {/* Problem Description */}
+
+      {/* LEFT: Problem Description */}
       <div className="w-1/2 p-6 overflow-auto border-r border-gray-600 bg-white text-black">
-        <h1 className="text-2xl font-bold text-black">{problem.title}</h1>
+        
+        <h1 className="text-2xl font-bold">{problem.title}</h1>
         <hr className="my-3 border-gray-600" />
+
         <p className={`text-sm font-semibold mb-4 
-          ${problem.difficulty === "Easy" ? "text-green-400" :
-            problem.difficulty === "Medium" ? "text-yellow-400" :
-            "text-red-400"
+          ${problem.difficulty === "Easy" ? "text-green-500" :
+            problem.difficulty === "Medium" ? "text-yellow-500" :
+            "text-red-500"
           }`}
         >
-          <strong>Difficulty:</strong> {problem.difficulty}
+          Difficulty: {problem.difficulty}
         </p>
 
-        <p className="mt-2 text-black leading-relaxed">{problem.description}</p>
+        <p className="mt-2 leading-relaxed">{problem.description}</p>
 
-        {problem.testCases && problem.testCases.length > 0 && (
-          <div className="mt-4 bg-gray-950 p-3 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-200">Example Test Cases:</h3>
-            <pre className="text-black p-2 bg-white rounded-lg text-sm">
-              {problem.testCases.map((test, index) => (
-                <div key={index} className="mb-2">
-                  <strong>Input:</strong> {test.input} <br />
-                  <strong>Expected Output:</strong> {test.output}
-                </div>
-              ))}
-            </pre>
+        {/* ✅ Testcases (NEW STRUCTURE) */}
+        {testcases.length > 0 && (
+          <div className="mt-4 bg-gray-100 p-3 rounded-lg">
+            <h3 className="text-lg font-semibold">Example Test Cases:</h3>
+
+            {testcases.map((tc, index) => (
+              <div key={tc._id} className="mb-3 bg-white p-2 rounded">
+                <p><strong>Input:</strong> {tc.input}</p>
+                <p><strong>Expected Output:</strong> {tc.expectedOutput}</p>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Code Editor */}
+      {/* RIGHT: Code Editor */}
       <CodeEditor
         language={language}
         setLanguage={setLanguage}
@@ -94,37 +102,27 @@ function ProblemPage() {
         loading={loading}
       />
 
-      {/* Submission Result Modal */}
+      {/* ✅ Submission Modal */}
       {showModal && submissionResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
-            {/* Status (Correct or Incorrect) */}
-            <div className="flex justify-center items-center mb-4">
-              {submissionResult.message === "Correct Submission" ? (
-                <span className="text-green-600 text-5xl">✅</span>
-              ) : (
-                <span className="text-red-600 text-5xl">❌</span>
-              )}
-            </div>
+
             <h2 className="text-xl font-bold text-center">
-              {submissionResult.message}
+              {submissionResult.status}
             </h2>
 
-            {/* Test Case Results */}
             <div className="mt-4 max-h-96 overflow-auto">
-              {submissionResult.result.map((test, index) => (
+              {submissionResult.results?.map((test, index) => (
                 <div key={index} className="border p-3 rounded-md my-2">
                   <p><strong>Test Case {index + 1}</strong></p>
-                  <p><strong>Input:</strong> {problem.testCases[index].input}</p>
-                  <p><strong>Expected Output:</strong> {problem.testCases[index].output}</p>
+                  <p><strong>Input:</strong> {testcases[index]?.input}</p>
+                  <p><strong>Expected:</strong> {testcases[index]?.expectedOutput}</p>
                   <p><strong>Your Output:</strong> {test.output}</p>
-                  <p><strong>Runtime:</strong> {test.runtime} sec</p>
-                  <p><strong>Memory:</strong> {test.memory} KB</p>
+                  <p><strong>Status:</strong> {test.status}</p>
                 </div>
               ))}
             </div>
 
-            {/* Close Button */}
             <div className="flex justify-center mt-4">
               <button
                 onClick={() => setShowModal(false)}
@@ -133,6 +131,7 @@ function ProblemPage() {
                 Close
               </button>
             </div>
+
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Problem from "../models/Problem.js";
+import Testcase from "../models/Testcase.js";
 
 dotenv.config();
 
@@ -96,10 +97,37 @@ const problems = [
 ];
 
 const seedDB = async () => {
-  await Problem.deleteMany();  
-  await Problem.insertMany(problems);  
-  console.log("Database seeded successfully!");
-  mongoose.connection.close();  
+  try {
+    await Problem.deleteMany();
+    await Testcase.deleteMany();
+
+    for (let prob of problems) {
+      // Create Problem
+      const createdProblem = await Problem.create({
+        title: prob.title,
+        description: prob.description,
+        difficulty: prob.difficulty,
+      });
+
+      // Create Testcases
+      const testcases = prob.testCases.map((tc, index) => ({
+        problemId: createdProblem._id,
+        input: tc.input,
+        expectedOutput: tc.output,
+        isHidden: index >= 1, // first visible, rest hidden (optional logic)
+      }));
+
+      await Testcase.insertMany(testcases);
+    }
+
+    console.log("✅ Database seeded successfully!");
+    mongoose.connection.close();
+
+  } catch (err) {
+    console.error(err);
+    mongoose.connection.close();
+  }
 };
 
 seedDB();
+
