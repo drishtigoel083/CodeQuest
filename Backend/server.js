@@ -1,4 +1,4 @@
-import express, { urlencoded } from "express";
+import express from "express";  
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,21 +8,15 @@ import executionRoutes from "./routes/executionRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
+
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5173","https://codequest-p0d4.onrender.com"], 
-  credentials: true, 
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
-// app.options("*", (req, res) => {
-//   res.header("Access-Control-Allow-Origin", "https://codequest-frontend-0kz2.onrender.com");
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   res.sendStatus(200);
-// });
 
 app.use(cookieParser());
 app.use(express.json());
@@ -33,11 +27,21 @@ app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/execution", executionRoutes);
 
-// Connect to MongoDB
-const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('MongoDB connected successfully!'))
-  .catch(err => console.error('MongoDB connection error:', err));
 
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error("MONGO_URI is not defined in .env");
+  process.exit(1);
+}
+
+// Connect to DB first, then start server 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully!");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
