@@ -16,8 +16,8 @@ const problems = [
     description: "Given an array of integers, return indices of two numbers such that they add up to a target. Input will be given as a string where the first part is the array followed by the target.",
     difficulty: "Easy",
     testCases: [
-      { input: "4 2 7 11 15 9", output: "0 1" },
-      { input: "3 3 2 4 6", output: "1 2" },
+      { input: "4 2 7 11 15 9", output: "1 2" },
+      { input: "3 3 2 4 6", output: "0 1" },
     ],
   },
   {

@@ -1,51 +1,69 @@
-import React from "react";
-import Editor from "@monaco-editor/react";
-
-const CodeEditor = ({ language, setLanguage, code, setCode, handleSubmit, output, loading }) => {
+function CodeEditor({
+  language,
+  setLanguage,
+  code,
+  setCode,
+  input,
+  setInput,
+  output,
+  loading,
+  handleRun,
+  handleSubmit,
+}) {
   return (
-    <div className="w-1/2 p-4 bg-gray-950 text-white flex flex-col">
-      {/* Language Selection */}
-      <div className="mb-2">
-        <label className="mr-2">Language:</label>
-        <select
-          className="bg-gray-800 text-white px-2 py-1"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          <option value="cpp">C++</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="javascript">JavaScript</option>
-        </select>
-      </div>
+    <div className="w-1/2 p-4 bg-gray-900 text-white flex flex-col">
 
-      {/* Code Editor */}
-      <Editor
-        height="400px"
-        theme="vs-dark"
-        language={language}
+      {/* Language Selector */}
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="mb-2 p-2 bg-gray-800"
+      >
+        <option value="cpp">C++</option>
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+      </select>
+
+      {/* Code Area */}
+      <textarea
         value={code}
-        onChange={(value) => setCode(value)}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="Write your code here..."
+        className="flex-1 p-3 bg-black text-green-400 font-mono"
       />
 
-      {/* Submit Button */}
-      <div className="flex space-x-4 mt-4">
+      {/* Input Box */}
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Custom Input"
+        className="mt-2 p-2 bg-gray-800"
+      />
+
+      {/* Buttons */}
+      <div className="flex gap-2 mt-2">
+        <button
+          onClick={handleRun}
+          className="bg-green-600 px-4 py-2"
+        >
+          Run
+        </button>
+
         <button
           onClick={handleSubmit}
-          disabled={loading}
-          className="bg-green-300 text-black px-4 py-2 rounded hover:bg-green-700 transition"
+          className="bg-blue-600 px-4 py-2"
         >
           Submit
         </button>
       </div>
 
-      {/* Output Display */}
-      <div className="mt-4 bg-gray-900 p-2 rounded text-white">
-        <h3 className="text-lg font-semibold">Output:</h3>
-        <pre className="text-sm">{output}</pre>
+      {/* Output */}
+      <div className="mt-3 p-2 bg-black h-40 overflow-auto">
+        <pre>{loading ? "Running..." : output}</pre>
       </div>
+
     </div>
   );
-};
+}
 
 export default CodeEditor;

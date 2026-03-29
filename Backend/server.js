@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
+import executionRoutes from "./routes/executionRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
+app.use("/api/execution", executionRoutes);
 
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;

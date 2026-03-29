@@ -11,38 +11,65 @@ function ProblemPage() {
 
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState("");
+  const [input, setInput] = useState(""); // 🔥 NEW
+
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [submissionResult, setSubmissionResult] = useState(null);
 
-  // ✅ Fetch problem + testcases
+  // 🔥 Language Map
+  const languageMap = {
+    cpp: 54,
+    python: 71,
+    javascript: 63,
+  };
+
   useEffect(() => {
     const fetchProblem = async () => {
       try {
         const res = await api.get(`api/problems/${id}`);
-
         setProblem(res.data.problem);
         setTestcases(res.data.testcases);
-
       } catch (error) {
-        console.error("Error Fetching problem", error);
+        console.error("Error fetching problem", error);
       }
     };
 
     fetchProblem();
   }, [id]);
 
-  // ✅ Submit Code
+  // 🟢 RUN CODE
+  const handleRun = async () => {
+    setLoading(true);
+
+    try {
+      const res = await api.post("/api/execution/run", {
+        code,
+        language: languageMap[language],
+        input,
+      });
+
+      setOutput(res.data.output || res.data.error);
+
+    } catch (error) {
+      setOutput("Error running code");
+    }
+
+    setLoading(false);
+  };
+
+  // 🔵 SUBMIT CODE
   const handleSubmit = async () => {
     setLoading(true);
 
     try {
-      const res = await api.post(
-        `/submissions/submit`, // future-proof endpoint
-        { code, language, problemId: id }
-      );
+      const res = await api.post("/api/execution/submit", {
+        code,
+        language: languageMap[language],
+        problemId: id,
+      });
 
       setSubmissionResult(res.data);
       setShowModal(true);
@@ -57,81 +84,61 @@ function ProblemPage() {
   if (!problem) return <p>Loading...</p>;
 
   return (
-    <div className="flex h-screen relative">
+    <div className="flex h-screen">
 
-      {/* LEFT: Problem Description */}
-      <div className="w-1/2 p-6 overflow-auto border-r border-gray-600 bg-white text-black">
-        
+      {/* LEFT SIDE */}
+      <div className="w-1/2 p-6 overflow-auto border-r bg-white">
         <h1 className="text-2xl font-bold">{problem.title}</h1>
-        <hr className="my-3 border-gray-600" />
 
-        <p className={`text-sm font-semibold mb-4 
-          ${problem.difficulty === "Easy" ? "text-green-500" :
-            problem.difficulty === "Medium" ? "text-yellow-500" :
-            "text-red-500"
-          }`}
-        >
-          Difficulty: {problem.difficulty}
-        </p>
+        <p className="mt-2">{problem.description}</p>
 
-        <p className="mt-2 leading-relaxed">{problem.description}</p>
-
-        {/* ✅ Testcases (NEW STRUCTURE) */}
-        {testcases.length > 0 && (
-          <div className="mt-4 bg-gray-100 p-3 rounded-lg">
-            <h3 className="text-lg font-semibold">Example Test Cases:</h3>
-
-            {testcases.map((tc, index) => (
-              <div key={tc._id} className="mb-3 bg-white p-2 rounded">
-                <p><strong>Input:</strong> {tc.input}</p>
-                <p><strong>Expected Output:</strong> {tc.expectedOutput}</p>
-              </div>
-            ))}
+        {/* Testcases */}
+        {testcases.map((tc) => (
+          <div key={tc._id} className="mt-3 p-2 bg-gray-100 rounded">
+            <p><b>Input:</b> {tc.input}</p>
+            <p><b>Output:</b> {tc.expectedOutput}</p>
           </div>
-        )}
+        ))}
       </div>
 
-      {/* RIGHT: Code Editor */}
+      {/* RIGHT SIDE */}
       <CodeEditor
         language={language}
         setLanguage={setLanguage}
         code={code}
         setCode={setCode}
-        handleSubmit={handleSubmit}
+        input={input}
+        setInput={setInput}
         output={output}
         loading={loading}
+        handleRun={handleRun}
+        handleSubmit={handleSubmit}
       />
 
-      {/* ✅ Submission Modal */}
+      {/* MODAL */}
       {showModal && submissionResult && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+          <div className="bg-white p-6 rounded w-1/2">
 
             <h2 className="text-xl font-bold text-center">
               {submissionResult.status}
             </h2>
 
-            <div className="mt-4 max-h-96 overflow-auto">
-              {submissionResult.results?.map((test, index) => (
-                <div key={index} className="border p-3 rounded-md my-2">
-                  <p><strong>Test Case {index + 1}</strong></p>
-                  <p><strong>Input:</strong> {testcases[index]?.input}</p>
-                  <p><strong>Expected:</strong> {testcases[index]?.expectedOutput}</p>
-                  <p><strong>Your Output:</strong> {test.output}</p>
-                  <p><strong>Status:</strong> {test.status}</p>
-                </div>
-              ))}
-            </div>
+            {submissionResult.results.map((r, i) => (
+              <div key={i} className="border p-2 my-2">
+                <p><b>Input:</b> {r.input}</p>
+                <p><b>Expected:</b> {r.expected}</p>
+                <p><b>Your Output:</b> {r.output}</p>
+                <p><b>Status:</b> {r.status}</p>
+              </div>
+            ))}
 
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-              >
-                Close
-              </button>
-            </div>
-
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-3 bg-blue-500 text-white px-3 py-1"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
