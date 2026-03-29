@@ -210,11 +210,6 @@ Contributions are welcome! Here's how to get started:
 
 This project is licensed under the [MIT License](LICENSE).
 
----
-
-## 👨‍💻 Author
-
-Made with ❤️ by **[Your Name](https://github.com/your-username)**
 
 ---
 
