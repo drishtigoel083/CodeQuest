@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
 import executionRoutes from "./routes/executionRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/execution", executionRoutes);
+app.use("/api/ai", aiRoutes);
 
 
 const MONGO_URI = process.env.MONGO_URI;

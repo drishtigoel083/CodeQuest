@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import Navbar from "../components/Navbar";
+import { motion } from "framer-motion";
+import { FaSearch, FaCheckCircle, FaMinusCircle } from "react-icons/fa";
 
 function ProblemsPage() {
   const [problems, setProblems] = useState([]);
@@ -8,57 +11,45 @@ function ProblemsPage() {
   const [solvedQues, setSolvedQues] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [username, setUsername] = useState("user");
-  const [profilePic, setProfilePic] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  //Fetching All problems
-
+  // Fetching All problems
   useEffect(() => {
     const fetchProblems = async() => {
+      setLoading(true);
       try {
         const res = await api.get(`/api/problems?page=${page}`)
         setProblems(res.data.problems);
         setFilteredProblems(res.data.problems);
         setTotalPages(res.data.totalPages);
-        
       } catch (err) {
-        console.error("Error fetching problems",err)       
+        console.error("Error fetching problems", err)       
+      } finally {
+        setLoading(false);
       }
-
     };
     fetchProblems()
-  },[page])
+  }, [page])
 
-  // useEffect(() => {
-  //   axios
-  //     .get("https://codequest-server-3fyv.onrender.com/api/auth/profile", {
-  //       withCredentials: true,
-  //     })
-  //     .then((res) => {
-  //       setUsername(res.data.username);
-  //       setProfilePic(res.data.profilePic);
-  //       setSolvedQues(res.data.solvedQues.map((q) => q._id));
-  //     })
-  //     .catch((err) => console.error("Error fetching user data", err));
-  // }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  //userData show
+  // Fetch userData
   useEffect(() => {
     const authProf = async() => {
       try {
         const res = await api.get("/api/auth/profile")
-        setUsername(res.data.username);
-        setProfilePic(res.data.profilePic);
-        setSolvedQues(res.data.solvedQues.map((q) => q._id));
-        
+        if (res.data?.solvedQues) {
+          setSolvedQues(res.data.solvedQues.map((q) => q._id));
+          setIsAuthenticated(true);
+        }
       } catch (err) {
-        console.error("Error fetching user data", err)       
+        console.error("Error fetching user data", err)
+        setIsAuthenticated(false);
       }
     }
     authProf()
-  },[]);
+  }, []);
 
   useEffect(() => {
     const filtered = problems.filter((problem) =>
@@ -67,116 +58,147 @@ function ProblemsPage() {
     setFilteredProblems(filtered);
   }, [searchQuery, problems]);
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty.toLowerCase()) {
+  const getDifficultyStyles = (difficulty) => {
+    switch (difficulty?.toLowerCase()) {
       case "easy":
-        return "text-green-600";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "medium":
-        return "text-yellow-600";
+        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
       case "hard":
-        return "text-red-600";
+        return "bg-red-500/10 text-red-400 border-red-500/20";
       default:
-        return "text-gray-600";
+        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-black flex flex-col items-center px-4">
-      {/* Navbar */}
-      <div className="w-full flex justify-end p-4 bg-green-300 fixed top-0 left-0 right-0 shadow-md">
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => navigate("/profile")}
+    <div className="min-h-screen bg-[#0f172a] text-slate-300 font-sans selection:bg-emerald-500/30 font-sans flex flex-col">
+      <Navbar />
+
+      <main className="container mx-auto px-4 py-10 flex-1 flex flex-col">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          {profilePic ? (
-            <img
-              src={profilePic}
-              alt="Profile"
-              className="w-10 h-10 rounded-full object-cover border border-gray-600"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-400"></div>
-          )}
-          <span className="text-lg font-semibold">{username}</span>
-        </div>
-      </div>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
+            Practice <span className="text-emerald-500">Problems</span>
+          </h1>
+          <p className="text-slate-400 text-lg">Enhance your competitive programming skills here.</p>
+        </motion.div>
 
-      {/* Card Container */}
-      <div className="w-full md:w-3/4 bg-white shadow-xl rounded-xl p-10 mt-28">
-        <h1 className="text-3xl font-bold mb-4 text-center">PROBLEM LIST</h1>
+        <div className="bg-[#0b1120] border border-slate-800 shadow-xl rounded-3xl p-6 md:p-8 flex-1 flex flex-col relative overflow-hidden backdrop-blur-lg">
+          
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                placeholder="Search problems..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition"
+              />
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg" />
+            </div>
+            
+            <div className="text-sm font-semibold text-slate-400 bg-slate-900 px-4 py-2 border border-slate-700 rounded-xl">
+              Showing {filteredProblems.length} Problems
+            </div>
+          </div>
 
-        
-        <div className="flex justify-center mb-4">
-          <input
-            type="text"
-            placeholder="Search problems..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full max-w-md p-3 rounded-xl bg-gray-200 text-black focus:outline-none px-4 shadow-md border border-gray-300"
-          />
-        </div>
-
-        {/* Table Container */}
-        <div className="overflow-x-auto">
-          <table className="w-full border border-gray-300 rounded-xl overflow-hidden shadow-lg border-collapse">
-            <thead className="bg-gray-200 text-black">
-              <tr>
-                <th className="p-4 text-left border-b border-gray-300">Title</th>
-                <th className="p-4 text-left border-b border-gray-300">Difficulty</th>
-                <th className="p-4 text-left border-b border-gray-300">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProblems.map((problem) => (
-                <tr key={problem._id} className="hover:bg-gray-100 transition">
-                  <td className="p-4 border-b border-gray-300">
-                    <Link to={`/problems/${problem._id}`} className="text-blue-500 hover:underline">
-                      {problem.title}
-                    </Link>
-                  </td>
-                  <td
-                    className={`p-4 border-b border-gray-300 font-bold ${getDifficultyColor(
-                      problem.difficulty
-                    )}`}
-                  >
-                    {problem.difficulty}
-                  </td>
-                  <td className="p-4 border-b border-gray-300 text-center">
-                    {solvedQues.includes(problem._id) ? (
-                      <span className="text-green-500 font-bold text-lg">✔</span>
-                    ) : (
-                      <span>-</span>
-                    )}
-                  </td>
+          <div className="overflow-x-auto rounded-xl border border-slate-800 flex-1">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-900 text-slate-400 text-sm uppercase font-bold tracking-wider">
+                <tr>
+                  <th className="p-5 border-b border-slate-800 font-semibold w-16 text-center">Status</th>
+                  <th className="p-5 border-b border-slate-800 font-semibold">Problem Title</th>
+                  <th className="p-5 border-b border-slate-800 font-semibold w-32">Difficulty</th>
+                  <th className="p-5 border-b border-slate-800 font-semibold w-32 text-center">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {loading ? (
+                  <tr>
+                    <td colSpan="4" className="p-10 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-slate-400">Loading problems...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredProblems.length > 0 ? (
+                  filteredProblems.map((problem, i) => (
+                    <motion.tr 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      key={problem._id} 
+                      className="hover:bg-slate-800/50 transition group"
+                    >
+                      <td className="p-5 text-center">
+                        {solvedQues.includes(problem._id) ? (
+                          <FaCheckCircle className="text-emerald-500 text-xl mx-auto drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        ) : (
+                          <FaMinusCircle className="text-slate-600 text-xl mx-auto" />
+                        )}
+                      </td>
+                      <td className="p-5">
+                        <Link to={isAuthenticated ? `/problems/${problem._id}` : "/login"} className="text-white hover:text-emerald-400 font-semibold text-base transition-colors">
+                          {problem.title}
+                        </Link>
+                      </td>
+                      <td className="p-5">
+                        <span className={`px-3 py-1 text-xs font-bold uppercase rounded-md border ${getDifficultyStyles(problem.difficulty)}`}>
+                          {problem.difficulty}
+                        </span>
+                      </td>
+                      <td className="p-5 text-center">
+                        <Link to={isAuthenticated ? `/problems/${problem._id}` : "/login"}>
+                          <button className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-slate-900 border border-emerald-500/30 px-4 py-1.5 rounded-lg text-sm font-bold transition">
+                            Solve
+                          </button>
+                        </Link>
+                      </td>
+                    </motion.tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="p-10 text-center text-slate-500">
+                      No problems found matching '{searchQuery}'
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      {/* Pagination */}
-      <div className="mt-6 flex gap-4">
-        <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          disabled={page === 1}
-          className="px-4 py-2 bg-gray-300 text-black rounded-lg disabled:opacity-50 hover:bg-gray-400"
-        >
-          ⬅ Previous
-        </button>
-        <span className="text-lg font-semibold">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={page === totalPages}
-          className="px-4 py-2 bg-gray-300 text-black rounded-lg disabled:opacity-50 hover:bg-gray-400"
-        >
-          Next ➡
-        </button>
-      </div>
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="mt-8 flex justify-center items-center gap-4">
+              <button
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+                className="px-5 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition"
+              >
+                Previous
+              </button>
+              <div className="text-slate-400 font-semibold">
+                Page <span className="text-white bg-slate-800 px-3 py-1 rounded-md mx-1">{page}</span> of <span className="text-white">{totalPages}</span>
+              </div>
+              <button
+                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={page === totalPages}
+                className="px-5 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
 
 export default ProblemsPage;
+

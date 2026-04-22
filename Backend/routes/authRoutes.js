@@ -48,7 +48,7 @@ router.post("/login", async (req, res) => {
 
 // Profile Route
 router.get("/profile", checkUser, async (req, res) => {
-  const user = await req.user.populate("solvedQues", "difficulty");
+  const user = await req.user.populate("solvedQues", "difficulty title");
   if (!user) {
     return res.status(404).json({ message: "Profile not found" });
   }

@@ -14,69 +14,65 @@ export const submitCode = async (req, res) => {
 
 
 
-    const normalize = (str) =>
-       (str || "").trim().replace(/\s+/g, "");
+    const normalize = (str) => (str || "").trim().replace(/\\s+/g, "");
 
-for (let i = 0; i < testcases.length; i++) {
-  const tc = testcases[i];
+    // Optimize test case execution: Run concurrently
+    const executionPromises = testcases.map(tc => 
+      executeCode(code, language, tc.input).then(result => ({ tc, result }))
+    );
+    
+    const executedResults = await Promise.all(executionPromises);
 
-  const result = await executeCode(code, language, tc.input);
+    for (const { tc, result } of executedResults) {
+      const status = result.status?.description;
 
-  const status = result.status?.description;
+      // ❌ 1. Compilation Error
+      if (status === "Compilation Error") {
+        finalStatus = "Compilation Error";
+        results.push({
+          input: tc.input,
+          expected: tc.expectedOutput,
+          output: result.compile_output,
+          status: "Compilation Error",
+        });
+        break; // Note: Since they ran concurrently, we still break to only show the first major error
+      }
 
-  // ❌ 1. Compilation Error
-  if (status === "Compilation Error") {
-    finalStatus = "Compilation Error";
+      // ❌ 2. Runtime Error
+      if (status !== "Accepted") {
+        finalStatus = "Runtime Error";
+        results.push({
+          input: tc.input,
+          expected: tc.expectedOutput,
+          output: result.stderr || result.message,
+          status: "Runtime Error",
+        });
+        break;
+      }
 
-    results.push({
-      input: tc.input,
-      expected: tc.expectedOutput,
-      output: result.compile_output,
-      status: "Compilation Error",
-    });
+      // ✅ 3. Compare Output
+      const output = normalize(result.stdout);
+      const expected = normalize(tc.expectedOutput);
 
-    break;
-  }
+      if (output !== expected) {
+        finalStatus = "Wrong Answer";
+        results.push({
+          input: tc.input,
+          expected,
+          output,
+          status: "Failed",
+        });
+        break;
+      }
 
-  // ❌ 2. Runtime Error
-  if (status !== "Accepted") {
-    finalStatus = "Runtime Error";
-
-    results.push({
-      input: tc.input,
-      expected: tc.expectedOutput,
-      output: result.stderr || result.message,
-      status: "Runtime Error",
-    });
-
-    break;
-  }
-
-  // ✅ 3. Compare Output
-  const output = normalize(result.stdout);
-  const expected = normalize(tc.expectedOutput);
-
-  if (output !== expected) {
-    finalStatus = "Wrong Answer";
-
-    results.push({
-      input: tc.input,
-      expected,
-      output,
-      status: "Failed",
-    });
-
-    break;
-  }
-
-  // ✅ Passed
-  results.push({
-    input: tc.input,
-    expected,
-    output,
-    status: "Passed",
-  });
-}
+      // ✅ Passed
+      results.push({
+        input: tc.input,
+        expected,
+        output,
+        status: "Passed",
+      });
+    }
 
     // 💾 Save submission
     const submission = await Submission.create({
